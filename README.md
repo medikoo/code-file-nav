@@ -32,12 +32,16 @@ You can also use the commands at the bottom of the quick pick palette to perform
 ## To do
 
 - Write unit tests
+- Show list of accessible drives
 - Implement `> Cut` command
 - Implement `> Copy` command
 - Implement `> Paste` command
 - Implement `> Rename` command
+- Implement `> Duplicate` command
 - Implement `> Change Mode` command
 - Recursive mkdir for `> New File` and `> New Folder`
+- Create multiple files or folders in the current directory with `> New File` and `> New Folder`
+- Configurable file/folder exclusions (read .gitignore etc)
+- Configurable file/folder exclusions (manual)
 - Configurable default root to open if no working document is found
-- Configurable file/folder exclusions
 - Configurable file permissions for new files and folders
