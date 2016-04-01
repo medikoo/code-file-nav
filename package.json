@@ -3,7 +3,7 @@
     "displayName": "code-file-nav",
     "description": "A file system navigator that allows for actions to be performed in the file system using only the keyboard via the quick pick palette",
     "version": "0.0.1",
-    "publisher": "Jake Lucas",
+    "publisher": "jakelucas",
     "engines": {
         "vscode": "^0.10.10"
     },
