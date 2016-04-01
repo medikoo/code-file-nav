@@ -162,10 +162,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     let disposable = vscode.commands.registerCommand('extension.codeFileNav', () => {
         let editor = vscode.window.activeTextEditor;
+        let workspace = vscode.workspace.rootPath;
         let cwd = '/';
 
         if (editor) {
             cwd = path.dirname(editor.document.fileName);
+        } else if (workspace) {
+            cwd = workspace;
         }
 
         showFileList(cwd);
