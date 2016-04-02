@@ -32,7 +32,8 @@ You can also use the commands at the bottom of the quick pick palette to perform
 ## To do
 
 - Write unit tests
-- Show list of accessible drives
+- Use file/folder/drive list as keys for an object that contains metadata about each option
+- Speed up list of accessible drives
 - Implement `> Cut` command
 - Implement `> Copy` command
 - Implement `> Paste` command
