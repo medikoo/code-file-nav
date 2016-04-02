@@ -26,6 +26,8 @@ You can also use the commands at the bottom of the quick pick palette to perform
   - Prompts you for a new file name and write an empty file to the current folder
 - `> New folder`
   - Prompts you for a new folder name and attempt to create a new folder
+- `> Rename`
+  - Allows you to select a file or folder to rename
 - `> Delete`
   - Allows you to select a file or folder to delete
 - `> Change drive`
