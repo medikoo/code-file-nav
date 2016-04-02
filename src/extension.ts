@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as child_process from 'child_process';
+const drivelist = require('drivelist');
 
 export function activate(context: vscode.ExtensionContext) {
     let lastCwd: string = '';
@@ -41,9 +42,10 @@ export function activate(context: vscode.ExtensionContext) {
             });
 
             let commands = [
-                '> New File',
-                '> New Folder',
+                '> New file',
+                '> New folder',
                 '> Delete',
+                '> Change drive',
             ];
 
             let options = ['..'].concat(files, commands);
@@ -56,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
                 let isCmd = true;
 
                 switch (file) {
-                    case '> New File': {
+                    case '> New file': {
                         vscode.window.showInputBox({
                             placeHolder: 'Enter your new file name'
                         }).then(fileName => {
@@ -73,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                         break;
                     }
-                    case '> New Folder': {
+                    case '> New folder': {
                         vscode.window.showInputBox({
                             placeHolder: 'Enter your new folder name'
                         }).then(folderName => {
@@ -134,8 +136,20 @@ export function activate(context: vscode.ExtensionContext) {
 
                         break;
                     }
+                    case '> Change drive': {
+                        drivelist.list((err, drives) => {
+                            let driveList = drives.map(drive => drive.name);
+
+                            vscode.window.showQuickPick(driveList).then(drive => {
+                                showFileList(drive);
+                            });
+                        });
+
+                        break;
+                    }
                     default: {
                         isCmd = false;
+
                         break;
                     }
                 }
