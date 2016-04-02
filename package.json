@@ -1,9 +1,15 @@
 {
   "name": "code-file-nav",
   "displayName": "File Navigator",
-  "description": "A file system navigator that allows for actions to be performed in the file system using only the keyboard via the quick pick palette",
+  "description": "A Visual Studio Code extension that allows easy navigation and file/folder manipulation of the filesystem via quick pick palettes",
   "version": "0.1.1",
   "publisher": "jakelucas",
+  "license":"MIT",
+  "homepage":"https://github.com/jakelucas/code-file-nav",
+  "repository": {
+    "type":"git",
+    "url":"https://github.com/jakelucas/code-file-nav"
+  },
   "engines": {
     "vscode": "^0.10.10"
   },
