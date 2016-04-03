@@ -30,6 +30,12 @@ You can also use the commands at the bottom of the quick pick palette to perform
   - Prompts you for a new folder name and attempt to create a new folder
 - `> Rename`
   - Allows you to select a file or folder to rename
+- `> Copy`
+  - Allows you to select a file or folder to copy
+- `> Cut`
+  - Allows you to select a file or folder to cut
+- `> Paste`
+  - Will only show after copying or cutting a file or folder and pastes into the current folder
 - `> Delete`
   - Allows you to select a file or folder to delete
 - `> Change drive`
@@ -40,17 +46,12 @@ You can also use the commands at the bottom of the quick pick palette to perform
 - Write unit tests
 - Error on invalid characters in file/folder names
 - Speed up the `> Change drive` command
-- Implement `> Cut` command
-- Implement `> Copy` command
-- Implement `> Paste` command
 - Implement `> Duplicate` command (shortcut for `> Copy` then `> Paste` in the same folder
 - Implement `> Change mode` command
 - Implement `> Bookmarks` command
-- Recursive mkdir for `> New file`, `> New folder` and `> Rename`
-- Check for existing files when using the `> New file` command
-- Check for existing folders when using the `> New folder` command
-- Check for existing files or folders when using the `> Rename` command
-- Create multiple files or folders in the current directory with `> New file` and `> New folder`
+- Recursive mkdir for any command that could include additional folders using slashes
+- Check for existing files or folders properly on all commands
+- Create multiple files or folders in the current directory with any command that would create files or folders
 - Configurable file/folder exclusions (read .gitignore etc)
 - Configurable file/folder exclusions (manual)
 - Configurable default folder to open
