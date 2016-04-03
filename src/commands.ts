@@ -10,39 +10,50 @@ const drivelist = require('drivelist');
 
 interface cmdData {
     cwd: string;
-    files: string[];
+    files: codeFileNav.fileData[];
 }
 
 interface cmd {
+    position: string;
     label: string;
     handler: (data: cmdData) => void;
 }
 
 let cmds: cmd[] = [
     {
+        position: 'top',
+        label: '..',
+        handler: up,
+    },
+    {
+        position: 'bottom',
         label: '> New file',
         handler: newFile,
     },
     {
+        position: 'bottom',
         label: '> New folder',
         handler: newFolder,
     },
     {
+        position: 'bottom',
         label: '> Rename',
         handler: rename,
     },
     {
+        position: 'bottom',
         label: '> Delete',
         handler: remove,
     },
     {
+        position: 'bottom',
         label: '> Change drive',
         handler: changeDrive,
     },
 ];
 
-export function getList(): string[] {
-    return cmds.map(cmd => cmd.label);
+export function getList(position: string): string[] {
+    return cmds.filter(cmd => cmd.position === position).map(cmd => cmd.label);
 }
 
 export function handle(cmdLabel: string, data: cmdData): boolean {
@@ -60,7 +71,13 @@ export function handle(cmdLabel: string, data: cmdData): boolean {
     return isCmd;
 }
 
-// Command handlers are defined below
+////////////////////////////////////////
+// Command handlers are defined below //
+////////////////////////////////////////
+
+export function up(data: cmdData): void {
+    codeFileNav.showFileList(path.join(data.cwd, '..'));
+}
 
 export function newFile(data: cmdData): void {
     vscode.window.showInputBox({
@@ -99,56 +116,57 @@ export function newFolder(data: cmdData): void {
 }
 
 export function remove(data: cmdData): void {
-    vscode.window.showQuickPick(data.files).then(file => {
+    vscode.window.showQuickPick(data.files.map(file => file.label), {
+        placeHolder: 'Choose a file or folder to delete'
+    }).then(label => {
+        const file = data.files.find(file => file.label === label);
+
         if (!file) {
             codeFileNav.showFileList();
 
             return;
         }
 
-        let fullPath: string = path.join(data.cwd, file);
+        if (!file.isFile && !file.isDirectory) { return; }
 
-        fs.lstat(fullPath, (err, stats) => {
-            if (codeFileNav.checkError(err)) { return; }
-            if (!stats.isFile() && !stats.isDirectory()) { return; }
+        let type: string = file.isFile ? 'file' : 'folder';
+        let cmd: string = os.platform() === 'win32' ? 'rmdir /s /q' : 'rm -rf';
 
-            let type: string = stats.isFile() ? 'file' : 'folder';
-            let cmd: string = os.platform() === 'win32' ? 'rmdir /s /q' : 'rm -rf';
+        vscode.window.showQuickPick(['No', 'Yes'], {
+            placeHolder: `Are you sure you want to permanently delete the "${file.name}" ${type}?`
+        }).then(answer => {
+            if (answer === 'Yes') {
+                if (type === 'file') {
+                    fs.unlink(file.path, err => {
+                        if (codeFileNav.checkError(err)) { return; }
 
-            vscode.window.showQuickPick(['No', 'Yes'], {
-                placeHolder: `Are you sure you want to delete the "${file}" ${type}?`
-            }).then(answer => {
-                if (answer === 'Yes') {
-                    if (type === 'file') {
-                        fs.unlink(fullPath, err => {
-                            if (codeFileNav.checkError(err)) { return; }
+                        codeFileNav.showFileList();
+                    });
+                } else if (type === 'folder') {
+                    child_process.exec(`${cmd} ${file.path}`, (err, stdout, stderr) => {
+                        if (codeFileNav.checkError(err)) { return; }
 
-                            codeFileNav.showFileList();
-                        });
-                    } else if (type === 'folder') {
-                        child_process.exec(`${cmd} ${fullPath}`, (err, stdout, stderr) => {
-                            if (codeFileNav.checkError(err)) { return; }
-
-                            codeFileNav.showFileList();
-                        });
-                    }
-                } else {
-                    codeFileNav.showFileList();
+                        codeFileNav.showFileList();
+                    });
                 }
-            });
+            } else {
+                codeFileNav.showFileList();
+            }
         });
     });
 }
 
 export function rename(data: cmdData): void {
-    vscode.window.showQuickPick(data.files).then(file => {
+    vscode.window.showQuickPick(data.files.map(file => file.label), {
+        placeHolder: 'Choose a file or folder to rename'
+    }).then(label => {
+        const file = data.files.find(file => file.label === label);
+
         if (!file) {
             codeFileNav.showFileList();
 
             return;
         }
-
-        let oldPath: string = path.join(data.cwd, file);
 
         vscode.window.showInputBox({
             placeHolder: 'Enter a new name'
@@ -161,7 +179,7 @@ export function rename(data: cmdData): void {
 
             let newPath: string = path.join(data.cwd, newName);
 
-            fs.rename(oldPath, newPath, err => {
+            fs.rename(file.path, newPath, err => {
                 if (codeFileNav.checkError(err)) { return; }
 
                 codeFileNav.showFileList();
