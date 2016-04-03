@@ -3,75 +3,61 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as cmds from './commands';
+import * as commands from './commands';
 
 export let cwd: string = '';
+
+export function checkError(err: NodeJS.ErrnoException): boolean {
+    if (err) {
+        vscode.window.showErrorMessage(err.message);
+    }
+
+    return !!err;
+}
 
 export function showFileList(dir?: string): void {
     dir = dir || cwd;
 
-    if (!dir) {
-        return;
-    }
+    if (!dir) { return; }
 
     try {
         let stats: fs.Stats = fs.lstatSync(dir);
 
-        if (!stats.isDirectory()) {
-            return;
-        }
+        if (!stats.isDirectory()) { return; }
     } catch (err) {
+        checkError(err);
+
         return;
     }
 
     cwd = dir;
 
     fs.readdir(dir, (err, files) => {
+        if (checkError(err)) { return; }
+
         files = files.filter(file => {
             try {
                 let fullPath: string = path.join(dir, file);
                 let stats: fs.Stats = fs.lstatSync(fullPath);
 
                 return stats.isDirectory() || stats.isFile();
-            } catch (err) {
-                return false;
-            }
+            } catch (err) { return; }
         });
 
-        let commands: string[] = [
-            '> New file',
-            '> New folder',
-            '> Rename',
-            '> Delete',
-            '> Change drive',
-        ];
-
-        let options: string[] = ['..'].concat(files, commands);
+        let cmdOptions: string[] = commands.getList();
+        let options: string[] = ['..'].concat(files, cmdOptions);
 
         vscode.window.showQuickPick(options).then(file => {
-            if (!file) {
-                return;
-            }
-
-            let isCmd: boolean = true;
-
-            switch (file) {
-                case '> New file': cmds.newFile(cwd); break;
-                case '> New folder': cmds.newFolder(cwd); break;
-                case '> Rename': cmds.rename(cwd, files); break;
-                case '> Delete': cmds.remove(cwd, files); break;
-                case '> Change drive': cmds.changeDrive(); break;
-                default: isCmd = false; break;
-            }
+            if (!file) { return; }
 
             // If a command is being run then don't show the default list of files and folders
-            if (isCmd) {
-                return;
-            }
+            if (commands.handle(file, { cwd, files })) { return; }
 
             let fullPath: string = path.join(dir, file);
 
             fs.lstat(fullPath, (err, stats) => {
+                if (checkError(err)) { return; }
+
                 if (stats.isDirectory()) {
                     showFileList(fullPath);
                 } else if (stats.isFile()) {
