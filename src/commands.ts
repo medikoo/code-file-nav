@@ -1,11 +1,10 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import * as child_process from 'child_process';
 import * as codeFileNav from './code_file_nav';
+const fs = require('fs-extra');
 const drivelist = require('drivelist');
 
 interface cmdData {
@@ -130,25 +129,16 @@ export function remove(data: cmdData): void {
         if (!file.isFile && !file.isDirectory) { return; }
 
         let type: string = file.isFile ? 'file' : 'folder';
-        let cmd: string = os.platform() === 'win32' ? 'rmdir /s /q' : 'rm -rf';
 
         vscode.window.showQuickPick(['No', 'Yes'], {
             placeHolder: `Are you sure you want to permanently delete the "${file.name}" ${type}?`
         }).then(answer => {
             if (answer === 'Yes') {
-                if (type === 'file') {
-                    fs.unlink(file.path, err => {
-                        if (codeFileNav.checkError(err)) { return; }
+                fs.remove(file.path, err => {
+                    if (codeFileNav.checkError(err)) { return; }
 
-                        codeFileNav.showFileList();
-                    });
-                } else if (type === 'folder') {
-                    child_process.exec(`${cmd} ${file.path}`, (err, stdout, stderr) => {
-                        if (codeFileNav.checkError(err)) { return; }
-
-                        codeFileNav.showFileList();
-                    });
-                }
+                    codeFileNav.showFileList();
+                });
             } else {
                 codeFileNav.showFileList();
             }

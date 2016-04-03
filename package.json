@@ -4,11 +4,11 @@
   "description": "A Visual Studio Code extension that allows easy navigation and file/folder manipulation of the filesystem via quick pick palettes",
   "version": "0.2.0",
   "publisher": "jakelucas",
-  "license":"MIT",
-  "homepage":"https://github.com/jakelucas/code-file-nav",
+  "license": "MIT",
+  "homepage": "https://github.com/jakelucas/code-file-nav",
   "repository": {
-    "type":"git",
-    "url":"https://github.com/jakelucas/code-file-nav"
+    "type": "git",
+    "url": "https://github.com/jakelucas/code-file-nav"
   },
   "engines": {
     "vscode": "^0.10.10"
@@ -45,6 +45,7 @@
     "vscode": "^0.11.0"
   },
   "dependencies": {
-    "drivelist": "^2.0.11"
+    "drivelist": "^2.0.11",
+    "fs-extra": "^0.26.7"
   }
 }
