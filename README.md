@@ -22,6 +22,8 @@ You can also use the commands at the bottom of the quick pick palette to perform
 
 ## Current available commands
 
+- `..`
+  - Moves the view up by one directory
 - `> New file`
   - Prompts you for a new file name and write an empty file to the current folder
 - `> New folder`
