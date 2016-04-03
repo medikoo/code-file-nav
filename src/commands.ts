@@ -16,6 +16,7 @@ interface cmd {
     position: string;
     label: string;
     handler: (data: cmdData) => void;
+    show?: (data: cmdData) => boolean;
 }
 
 let cmds: cmd[] = [
@@ -41,6 +42,22 @@ let cmds: cmd[] = [
     },
     {
         position: 'bottom',
+        label: '> Copy',
+        handler: copy,
+    },
+    {
+        position: 'bottom',
+        label: '> Cut',
+        handler: cut,
+    },
+    {
+        position: 'bottom',
+        label: '> Paste',
+        handler: paste,
+        show: cmdData => !!~['copy', 'cut'].indexOf(cutCopyCmdMemory),
+    },
+    {
+        position: 'bottom',
         label: '> Delete',
         handler: remove,
     },
@@ -51,23 +68,26 @@ let cmds: cmd[] = [
     },
 ];
 
-export function getList(position: string): string[] {
-    return cmds.filter(cmd => cmd.position === position).map(cmd => cmd.label);
+let cutCopyFileMemory: codeFileNav.fileData;
+let cutCopyCmdMemory: string;
+let lastCmd: string;
+
+export function getList(position: string, data: cmdData): string[] {
+    return cmds
+        .filter(cmd => cmd.position === position && (cmd.show ? cmd.show(data) : true))
+        .map(cmd => cmd.label);
 }
 
 export function handle(cmdLabel: string, data: cmdData): boolean {
-    let isCmd = false;
+    let command: cmd = cmds.find(cmd => cmd.label === cmdLabel);
 
-    cmds.forEach(cmd => {
-       if (cmd.label === cmdLabel) {
-           cmd.handler(data);
-           isCmd = true;
+    if (command) {
+        command.handler(data);
 
-           return;
-       }
-    });
+        lastCmd = command.label;
+    }
 
-    return isCmd;
+    return !!command;
 }
 
 ////////////////////////////////////////
@@ -118,7 +138,7 @@ export function remove(data: cmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to delete'
     }).then(label => {
-        const file = data.files.find(file => file.label === label);
+        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
 
         if (!file) {
             codeFileNav.showFileList();
@@ -128,7 +148,7 @@ export function remove(data: cmdData): void {
 
         if (!file.isFile && !file.isDirectory) { return; }
 
-        let type: string = file.isFile ? 'file' : 'folder';
+        const type: string = file.isFile ? 'file' : 'folder';
 
         vscode.window.showQuickPick(['No', 'Yes'], {
             placeHolder: `Are you sure you want to permanently delete the "${file.name}" ${type}?`
@@ -150,7 +170,7 @@ export function rename(data: cmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to rename'
     }).then(label => {
-        const file = data.files.find(file => file.label === label);
+        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
 
         if (!file) {
             codeFileNav.showFileList();
@@ -175,6 +195,101 @@ export function rename(data: cmdData): void {
                 codeFileNav.showFileList();
             });
         });
+    });
+}
+
+export function copy(data: cmdData): void {
+    vscode.window.showQuickPick(data.files.map(file => file.label), {
+        placeHolder: 'Choose a file or folder to copy'
+    }).then(label => {
+        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
+
+        if (!file) {
+            codeFileNav.showFileList();
+
+            return;
+        }
+
+        cutCopyFileMemory = file;
+        cutCopyCmdMemory = 'copy';
+
+        let command: cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
+
+        if (command) {
+            command.label = `> Paste (copy: ${cutCopyFileMemory.name})`;
+        }
+
+        codeFileNav.showFileList();
+    });
+}
+
+export function cut(data: cmdData): void {
+    vscode.window.showQuickPick(data.files.map(file => file.label), {
+        placeHolder: 'Choose a file or folder to cut'
+    }).then(label => {
+        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
+
+        if (!file) {
+            codeFileNav.showFileList();
+
+            return;
+        }
+
+        cutCopyFileMemory = file;
+        cutCopyCmdMemory = 'cut';
+
+        let command: cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
+
+        if (command) {
+            command.label = `> Paste (cut: ${cutCopyFileMemory.name})`;
+        }
+
+        codeFileNav.showFileList();
+    });
+}
+
+export function paste(data: cmdData): void {
+    if (!cutCopyFileMemory) {
+        codeFileNav.showFileList();
+
+        return;
+    }
+
+    const method = cutCopyCmdMemory === 'cut' ? fs.move : fs.copy;
+    let newPath: string = path.join(data.cwd, cutCopyFileMemory.name);
+
+    fs.access(newPath, err => {
+        if (err) {
+            method(cutCopyFileMemory.path, newPath, err => {
+                cutCopyCmdMemory = undefined;
+
+                if (codeFileNav.checkError(err)) { return; }
+
+                codeFileNav.showFileList();
+            });
+        } else {
+            const type: string = cutCopyFileMemory.isFile ? 'file' : 'folder';
+
+            vscode.window.showInputBox({
+                placeHolder: `The destination ${type} already exists, enter a new ${type} name`
+            }).then(newName => {
+                if (!newName) {
+                    codeFileNav.showFileList();
+
+                    return;
+                }
+
+                newPath = path.join(data.cwd, newName);
+
+                method(cutCopyFileMemory.path, newPath, err => {
+                    cutCopyCmdMemory = undefined;
+
+                    if (codeFileNav.checkError(err)) { return; }
+
+                    codeFileNav.showFileList();
+                });
+            });
+        }
     });
 }
 

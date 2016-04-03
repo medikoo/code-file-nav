@@ -65,15 +65,19 @@ export function showFileList(dir?: string): void {
             return arr;
         }, []);
 
-        let options: string[] = commands.getList('top').concat(files.map(file => file.label), commands.getList('bottom'));
+        let cmdData = { cwd, files };
+        let options: string[] = commands.getList('top', cmdData).concat(
+            files.map(file => file.label),
+            commands.getList('bottom', cmdData)
+        );
 
         vscode.window.showQuickPick(options).then(label => {
             if (!label) { return; }
 
-            const file = files.find(file => file.label === label);
+            const file: fileData = files.find(file => file.label === label);
 
             // If a command is being run then don't show the default list of files and folders
-            if (commands.handle(label, { cwd, files })) { return; }
+            if (commands.handle(label, cmdData)) { return; }
 
             if (file.isDirectory) {
                 showFileList(file.path);
