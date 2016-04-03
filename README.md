@@ -38,11 +38,12 @@ You can also use the commands at the bottom of the quick pick palette to perform
 ## To do
 
 - Write unit tests
+- Error on invalid characters in file/folder names
 - Speed up the `> Change drive` command
 - Implement `> Cut` command
 - Implement `> Copy` command
 - Implement `> Paste` command
-- Implement `> Duplicate` command
+- Implement `> Duplicate` command (shortcut for `> Copy` then `> Paste` in the same folder
 - Implement `> Change mode` command
 - Implement `> Bookmarks` command
 - Recursive mkdir for `> New file`, `> New folder` and `> Rename`
