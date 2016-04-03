@@ -36,7 +36,6 @@ You can also use the commands at the bottom of the quick pick palette to perform
 ## To do
 
 - Write unit tests
-- Use file/folder/drive list as keys for an object that contains metadata about each option
 - Speed up the `> Change drive` command
 - Implement `> Cut` command
 - Implement `> Copy` command
@@ -51,7 +50,7 @@ You can also use the commands at the bottom of the quick pick palette to perform
 - Create multiple files or folders in the current directory with `> New file` and `> New folder`
 - Configurable file/folder exclusions (read .gitignore etc)
 - Configurable file/folder exclusions (manual)
-- Configurable default root to open if no working document is found
+- Configurable default folder to open
 - Configurable file permissions for new files and folders
 - Configurable bookmark locations
 
