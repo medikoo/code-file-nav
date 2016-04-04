@@ -7,6 +7,11 @@ import * as codeFileNav from './code_file_nav';
 const fs = require('fs-extra');
 const drivelist = require('drivelist');
 
+interface bookmark {
+    label: string;
+    path: string;
+}
+
 interface cmdData {
     cwd: string;
     files: codeFileNav.fileData[];
@@ -65,6 +70,11 @@ let cmds: cmd[] = [
         position: 'bottom',
         label: '> Change drive',
         handler: changeDrive,
+    },
+    {
+        position: 'bottom',
+        label: '> Bookmarks',
+        handler: bookmarks,
     },
 ];
 
@@ -302,5 +312,46 @@ export function changeDrive(data: cmdData): void {
         vscode.window.showQuickPick(driveList).then(drive => {
             codeFileNav.showFileList(drive);
         });
+    });
+}
+
+function formatPath(path: string): string {
+    return path.replace(/\${home}/gi, os.homedir());
+}
+
+export function bookmarks(data: cmdData): void {
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('codeFileNav');
+    const platform = os.platform();
+    const bookmarks: bookmark[] = config.get(`bookmarks.${platform}`, []);
+    const bookmarkQuickPicks: string[] = bookmarks
+        .map(bookmark => {
+            bookmark.path = formatPath(bookmark.path);
+
+            return bookmark;
+        })
+        .filter(bookmark => {
+            try {
+                fs.accessSync(bookmark.path);
+
+                return true;
+            }
+            catch (err) {
+                return false;
+            }
+        })
+        .map(bookmark => bookmark.label);
+
+    vscode.window.showQuickPick(bookmarkQuickPicks).then(bookmarkLabel => {
+        const bookmark = bookmarks.find(bookmark => bookmark.label === bookmarkLabel);
+
+        if (!bookmark) {
+            codeFileNav.showFileList();
+
+            return;
+        }
+
+        bookmark.path = formatPath(bookmark.path);
+
+        codeFileNav.showFileList(bookmark.path);
     });
 }
