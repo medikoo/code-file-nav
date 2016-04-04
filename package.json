@@ -2,13 +2,16 @@
   "name": "code-file-nav",
   "displayName": "File Navigator",
   "description": "A Visual Studio Code extension that allows easy navigation and file/folder manipulation of the filesystem via quick pick palettes",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "jakelucas",
   "license": "MIT",
   "homepage": "https://github.com/jakelucas/code-file-nav",
   "repository": {
     "type": "git",
     "url": "https://github.com/jakelucas/code-file-nav"
+  },
+  "bugs": {
+    "url": "https://github.com/jakelucas/code-file-nav/issues"
   },
   "engines": {
     "vscode": "^0.10.10"
@@ -33,7 +36,33 @@
         "key": "ctrl+l",
         "mac": "ctrl+l"
       }
-    ]
+    ],
+    "configuration": {
+        "type": "object",
+        "title": "Code File Nav configuration",
+        "properties": {
+            "codeFileNav.bookmarks": {
+                "type": "object",
+                "description": "An array of bookmark objects to be used in the bookmark command's list based on the return value of `os.platform()`",
+                "default": {
+                    "win32": [
+                        {
+                            "label": "Desktop",
+                            "path": "${home}/Desktop"
+                        },
+                        {
+                            "label": "Documents",
+                            "path": "${home}/Documents"
+                        },
+                        {
+                            "label": "Downloads",
+                            "path": "${home}/Downloads"
+                        }
+                    ]
+                }
+            }
+        }
+    }
   },
   "scripts": {
     "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
