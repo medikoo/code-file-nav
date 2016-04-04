@@ -7,24 +7,24 @@ import * as codeFileNav from './code_file_nav';
 const fs = require('fs-extra');
 const drivelist = require('drivelist');
 
-interface bookmark {
+interface Bookmark {
     label: string;
     path: string;
 }
 
-interface cmdData {
+interface CmdData {
     cwd: string;
-    files: codeFileNav.fileData[];
+    files: codeFileNav.FileData[];
 }
 
-interface cmd {
+interface Cmd {
     position: string;
     label: string;
-    handler: (data: cmdData) => void;
-    show?: (data: cmdData) => boolean;
+    handler: (data: CmdData) => void;
+    show?: (data: CmdData) => boolean;
 }
 
-let cmds: cmd[] = [
+const cmds: Cmd[] = [
     {
         position: 'top',
         label: '..',
@@ -78,18 +78,26 @@ let cmds: cmd[] = [
     },
 ];
 
-let cutCopyFileMemory: codeFileNav.fileData;
+let cutCopyFileMemory: codeFileNav.FileData;
 let cutCopyCmdMemory: string;
 let lastCmd: string;
 
-export function getList(position: string, data: cmdData): string[] {
+function removeInvalidChars(input: string): string {
+    return input ? input.replace(/[/?*:"<>|\\]/g, '') : '';
+}
+
+function expandVars(path: string): string {
+    return path ? path.replace(/\${home}/gi, os.homedir()) : '';
+}
+
+export function getList(position: string, data: CmdData): string[] {
     return cmds
         .filter(cmd => cmd.position === position && (cmd.show ? cmd.show(data) : true))
         .map(cmd => cmd.label);
 }
 
-export function handle(cmdLabel: string, data: cmdData): boolean {
-    let command: cmd = cmds.find(cmd => cmd.label === cmdLabel);
+export function handle(cmdLabel: string, data: CmdData): boolean {
+    const command: Cmd = cmds.find(cmd => cmd.label === cmdLabel);
 
     if (command) {
         command.handler(data);
@@ -104,21 +112,25 @@ export function handle(cmdLabel: string, data: cmdData): boolean {
 // Command handlers are defined below //
 ////////////////////////////////////////
 
-export function up(data: cmdData): void {
+export function up(data: CmdData): void {
     codeFileNav.showFileList(path.join(data.cwd, '..'));
 }
 
-export function newFile(data: cmdData): void {
+export function newFile(data: CmdData): void {
     vscode.window.showInputBox({
         placeHolder: 'Enter your new file name'
     }).then(fileName => {
+        fileName = removeInvalidChars(fileName);
+
         if (!fileName) {
             codeFileNav.showFileList();
 
             return;
         }
 
-        fs.writeFile(path.join(data.cwd, fileName), '', err => {
+        const filePath: string = path.join(data.cwd, fileName);
+
+        fs.writeFile(filePath, '', err => {
             if (codeFileNav.checkError(err)) { return; }
 
             codeFileNav.showFileList();
@@ -126,17 +138,21 @@ export function newFile(data: cmdData): void {
     });
 }
 
-export function newFolder(data: cmdData): void {
+export function newFolder(data: CmdData): void {
     vscode.window.showInputBox({
         placeHolder: 'Enter your new folder name'
     }).then(folderName => {
+        folderName = removeInvalidChars(folderName);
+
         if (!folderName) {
             codeFileNav.showFileList();
 
             return;
         }
 
-        fs.mkdir(path.join(data.cwd, folderName), err => {
+        const folderPath: string = path.join(data.cwd, folderName);
+
+        fs.mkdir(folderPath, err => {
             if (codeFileNav.checkError(err)) { return; }
 
             codeFileNav.showFileList();
@@ -144,11 +160,11 @@ export function newFolder(data: cmdData): void {
     });
 }
 
-export function remove(data: cmdData): void {
+export function remove(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to delete'
     }).then(label => {
-        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
+        const file: codeFileNav.FileData = data.files.find(file => file.label === label);
 
         if (!file) {
             codeFileNav.showFileList();
@@ -176,11 +192,11 @@ export function remove(data: cmdData): void {
     });
 }
 
-export function rename(data: cmdData): void {
+export function rename(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to rename'
     }).then(label => {
-        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
+        const file: codeFileNav.FileData = data.files.find(file => file.label === label);
 
         if (!file) {
             codeFileNav.showFileList();
@@ -191,13 +207,15 @@ export function rename(data: cmdData): void {
         vscode.window.showInputBox({
             placeHolder: 'Enter a new name'
         }).then(newName => {
+            newName = removeInvalidChars(newName);
+
             if (!newName) {
                 codeFileNav.showFileList();
 
                 return;
             }
 
-            let newPath: string = path.join(data.cwd, newName);
+            const newPath: string = path.join(data.cwd, newName);
 
             fs.rename(file.path, newPath, err => {
                 if (codeFileNav.checkError(err)) { return; }
@@ -208,11 +226,11 @@ export function rename(data: cmdData): void {
     });
 }
 
-export function copy(data: cmdData): void {
+export function copy(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to copy'
     }).then(label => {
-        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
+        const file: codeFileNav.FileData = data.files.find(file => file.label === label);
 
         if (!file) {
             codeFileNav.showFileList();
@@ -223,7 +241,7 @@ export function copy(data: cmdData): void {
         cutCopyFileMemory = file;
         cutCopyCmdMemory = 'copy';
 
-        let command: cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
+        const command: Cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
 
         if (command) {
             command.label = `> Paste (copy: ${cutCopyFileMemory.name})`;
@@ -233,11 +251,11 @@ export function copy(data: cmdData): void {
     });
 }
 
-export function cut(data: cmdData): void {
+export function cut(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to cut'
     }).then(label => {
-        const file: codeFileNav.fileData = data.files.find(file => file.label === label);
+        const file: codeFileNav.FileData = data.files.find(file => file.label === label);
 
         if (!file) {
             codeFileNav.showFileList();
@@ -248,7 +266,7 @@ export function cut(data: cmdData): void {
         cutCopyFileMemory = file;
         cutCopyCmdMemory = 'cut';
 
-        let command: cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
+        const command: Cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
 
         if (command) {
             command.label = `> Paste (cut: ${cutCopyFileMemory.name})`;
@@ -258,7 +276,7 @@ export function cut(data: cmdData): void {
     });
 }
 
-export function paste(data: cmdData): void {
+export function paste(data: CmdData): void {
     if (!cutCopyFileMemory) {
         codeFileNav.showFileList();
 
@@ -283,6 +301,8 @@ export function paste(data: cmdData): void {
             vscode.window.showInputBox({
                 placeHolder: `The destination ${type} already exists, enter a new ${type} name`
             }).then(newName => {
+                newName = removeInvalidChars(newName);
+
                 if (!newName) {
                     codeFileNav.showFileList();
 
@@ -303,11 +323,11 @@ export function paste(data: cmdData): void {
     });
 }
 
-export function changeDrive(data: cmdData): void {
+export function changeDrive(data: CmdData): void {
     drivelist.list((err, drives) => {
         if (codeFileNav.checkError(err)) { return; }
 
-        let driveList: string[] = drives.map(drive => drive.name);
+        const driveList: string[] = drives.map(drive => drive.name);
 
         vscode.window.showQuickPick(driveList).then(drive => {
             codeFileNav.showFileList(drive);
@@ -315,17 +335,13 @@ export function changeDrive(data: cmdData): void {
     });
 }
 
-function formatPath(path: string): string {
-    return path.replace(/\${home}/gi, os.homedir());
-}
-
-export function bookmarks(data: cmdData): void {
+export function bookmarks(data: CmdData): void {
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('codeFileNav');
     const platform = os.platform();
-    const bookmarks: bookmark[] = config.get(`bookmarks.${platform}`, []);
+    const bookmarks: Bookmark[] = config.get(`bookmarks.${platform}`, []);
     const bookmarkQuickPicks: string[] = bookmarks
         .map(bookmark => {
-            bookmark.path = formatPath(bookmark.path);
+            bookmark.path = expandVars(bookmark.path);
 
             return bookmark;
         })
@@ -350,7 +366,7 @@ export function bookmarks(data: cmdData): void {
             return;
         }
 
-        bookmark.path = formatPath(bookmark.path);
+        bookmark.path = expandVars(bookmark.path);
 
         codeFileNav.showFileList(bookmark.path);
     });

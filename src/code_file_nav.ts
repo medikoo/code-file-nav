@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as commands from './commands';
 
-export interface fileData {
+export interface FileData {
     label: string;
     name: string;
     path: string;
@@ -13,7 +13,7 @@ export interface fileData {
     isDirectory: boolean;
 }
 
-export let cwd: string = '';
+let cwd: string = '';
 
 export function checkError(err: NodeJS.ErrnoException): boolean {
     if (err) {
@@ -29,7 +29,7 @@ export function showFileList(dir?: string): void {
     if (!dir) { return; }
 
     try {
-        let stats: fs.Stats = fs.lstatSync(dir);
+        const stats: fs.Stats = fs.lstatSync(dir);
 
         if (!stats.isDirectory()) { return; }
     } catch (err) {
@@ -40,16 +40,16 @@ export function showFileList(dir?: string): void {
 
     cwd = dir;
 
-    fs.readdir(dir, (err, results) => {
+    fs.readdir(cwd, (err, results) => {
         if (checkError(err)) { return; }
 
         // Build a lookup table
-        let files: fileData[] = results.reduce((arr, file) => {
+        const files: FileData[] = results.reduce((arr, file) => {
             try {
-                let fullPath: string = path.join(dir, file);
-                let stats: fs.Stats = fs.lstatSync(fullPath);
-                let isFile = stats.isFile();
-                let isDirectory = stats.isDirectory();
+                const fullPath: string = path.join(cwd, file);
+                const stats: fs.Stats = fs.lstatSync(fullPath);
+                const isFile = stats.isFile();
+                const isDirectory = stats.isDirectory();
 
                 if (isFile || isDirectory) {
                     arr.push({
@@ -65,8 +65,8 @@ export function showFileList(dir?: string): void {
             return arr;
         }, []);
 
-        let cmdData = { cwd, files };
-        let options: string[] = commands.getList('top', cmdData).concat(
+        const cmdData = { cwd, files };
+        const options: string[] = commands.getList('top', cmdData).concat(
             files.map(file => file.label),
             commands.getList('bottom', cmdData)
         );
@@ -74,7 +74,7 @@ export function showFileList(dir?: string): void {
         vscode.window.showQuickPick(options).then(label => {
             if (!label) { return; }
 
-            const file: fileData = files.find(file => file.label === label);
+            const file: FileData = files.find(file => file.label === label);
 
             // If a command is being run then don't show the default list of files and folders
             if (commands.handle(label, cmdData)) { return; }

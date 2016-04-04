@@ -6,8 +6,8 @@ import * as codeFileNav from './code_file_nav';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('extension.codeFileNav', () => {
-        let editor: vscode.TextEditor = vscode.window.activeTextEditor;
-        let workspace: string = vscode.workspace.rootPath;
+        const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+        const workspace: string = vscode.workspace.rootPath;
         let dir: string = '/';
 
         if (editor) {
