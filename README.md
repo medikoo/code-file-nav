@@ -20,6 +20,39 @@ Selecting a file will attempt to open that file in VSCode.
 
 You can also use the commands at the bottom of the quick pick palette to perform additional actions in the current folder.
 
+## Configuration
+
+`codeFileNav.bookmarks`
+
+Accepts an object of bookmark arrays. Bookmarks will be found based on the return value of `os.platform()` which will be used as a key.
+
+This means you can define OS specific bookmark arrays for `darwin`, `freebsd`, `linux`, `sunos` or `win32`.
+
+Each OS specific bookmark object should conatain `label` and `path` key value pairs.
+
+`${home}` will be automatically expanded to the value returned by `os.homedir()`.
+
+For example:
+
+```
+"codeFileNav.bookmarks": {
+    "win32": [
+        {
+            "label": "Desktop",
+            "path": "${home}/Desktop"
+        },
+        {
+            "label": "Documents",
+            "path": "${home}/Documents"
+        },
+        {
+            "label": "Downloads",
+            "path": "${home}/Downloads"
+        }
+    ]
+}
+```
+
 ## Current available commands
 
 - `..`
@@ -40,15 +73,15 @@ You can also use the commands at the bottom of the quick pick palette to perform
   - Allows you to select a file or folder to delete
 - `> Change drive`
   - Uses the [`drivelist`][drivelist-github] node module to list available drives to switch to
+- `> Bookmarks`
+  - Displays a list of bookmarked folders from the extension configuration based on the OS returned from `os.platform()`
 
 ## To do
 
 - Write unit tests
 - Error on invalid characters in file/folder names
-- Speed up the `> Change drive` command
 - Implement `> Duplicate` command (shortcut for `> Copy` then `> Paste` in the same folder
 - Implement `> Change mode` command
-- Implement `> Bookmarks` command
 - Recursive mkdir for any command that could include additional folders using slashes
 - Check for existing files or folders properly on all commands
 - Create multiple files or folders in the current directory with any command that would create files or folders
@@ -56,7 +89,6 @@ You can also use the commands at the bottom of the quick pick palette to perform
 - Configurable file/folder exclusions (manual)
 - Configurable default folder to open
 - Configurable file permissions for new files and folders
-- Configurable bookmark locations
 
 ## Contributing
 
