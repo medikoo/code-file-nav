@@ -79,7 +79,6 @@ For example:
 ## To do
 
 - Write unit tests
-- Error on invalid characters in file/folder names
 - Implement `> Duplicate` command (shortcut for `> Copy` then `> Paste` in the same folder
 - Implement `> Change mode` command
 - Recursive mkdir for any command that could include additional folders using slashes
