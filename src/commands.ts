@@ -7,6 +7,10 @@ import * as codeFileNav from './code_file_nav';
 const fs = require('fs-extra');
 const drivelist = require('drivelist');
 
+interface NewPathCallback {
+    (newPath: string): void;
+}
+
 interface Bookmark {
     label: string;
     path: string;
@@ -90,6 +94,28 @@ function expandVars(path: string): string {
     return path ? path.replace(/\${home}/gi, os.homedir()) : '';
 }
 
+function getNewPath(placeHolder: string, dir: string, callback: NewPathCallback) {
+    vscode.window.showInputBox({ placeHolder }).then(newName => {
+        newName = removeInvalidChars(newName);
+
+        if (!newName) {
+            codeFileNav.showFileList();
+
+            return;
+        }
+
+        const newPath: string = path.join(dir, newName);
+
+        fs.access(newPath, err => {
+            if (err) {
+                callback(newPath);
+            } else {
+                getNewPath('The destination already exists, enter another name', dir, callback);
+            }
+        });
+    });
+}
+
 export function getList(position: string, data: CmdData): string[] {
     return cmds
         .filter(cmd => cmd.position === position && (cmd.show ? cmd.show(data) : true))
@@ -117,20 +143,8 @@ export function up(data: CmdData): void {
 }
 
 export function newFile(data: CmdData): void {
-    vscode.window.showInputBox({
-        placeHolder: 'Enter your new file name'
-    }).then(fileName => {
-        fileName = removeInvalidChars(fileName);
-
-        if (!fileName) {
-            codeFileNav.showFileList();
-
-            return;
-        }
-
-        const filePath: string = path.join(data.cwd, fileName);
-
-        fs.writeFile(filePath, '', err => {
+    getNewPath('Enter a new file name', data.cwd, newPath => {
+        fs.writeFile(newPath, '', err => {
             if (codeFileNav.checkError(err)) { return; }
 
             codeFileNav.showFileList();
@@ -139,20 +153,8 @@ export function newFile(data: CmdData): void {
 }
 
 export function newFolder(data: CmdData): void {
-    vscode.window.showInputBox({
-        placeHolder: 'Enter your new folder name'
-    }).then(folderName => {
-        folderName = removeInvalidChars(folderName);
-
-        if (!folderName) {
-            codeFileNav.showFileList();
-
-            return;
-        }
-
-        const folderPath: string = path.join(data.cwd, folderName);
-
-        fs.mkdir(folderPath, err => {
+    getNewPath('Enter a new folder name', data.cwd, newPath => {
+        fs.mkdir(newPath, err => {
             if (codeFileNav.checkError(err)) { return; }
 
             codeFileNav.showFileList();
@@ -204,19 +206,7 @@ export function rename(data: CmdData): void {
             return;
         }
 
-        vscode.window.showInputBox({
-            placeHolder: 'Enter a new name'
-        }).then(newName => {
-            newName = removeInvalidChars(newName);
-
-            if (!newName) {
-                codeFileNav.showFileList();
-
-                return;
-            }
-
-            const newPath: string = path.join(data.cwd, newName);
-
+        getNewPath('Enter a new name', data.cwd, newPath => {
             fs.rename(file.path, newPath, err => {
                 if (codeFileNav.checkError(err)) { return; }
 
@@ -244,7 +234,7 @@ export function copy(data: CmdData): void {
         const command: Cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
 
         if (command) {
-            command.label = `> Paste (copy: ${cutCopyFileMemory.name})`;
+            command.label = `> Paste (will copy ${cutCopyFileMemory.name})`;
         }
 
         codeFileNav.showFileList();
@@ -269,7 +259,7 @@ export function cut(data: CmdData): void {
         const command: Cmd = cmds.find(cmd => cmd.label.substr(0, '> Paste'.length) === '> Paste');
 
         if (command) {
-            command.label = `> Paste (cut: ${cutCopyFileMemory.name})`;
+            command.label = `> Paste (will cut ${cutCopyFileMemory.name})`;
         }
 
         codeFileNav.showFileList();
@@ -296,21 +286,7 @@ export function paste(data: CmdData): void {
                 codeFileNav.showFileList();
             });
         } else {
-            const type: string = cutCopyFileMemory.isFile ? 'file' : 'folder';
-
-            vscode.window.showInputBox({
-                placeHolder: `The destination ${type} already exists, enter a new ${type} name`
-            }).then(newName => {
-                newName = removeInvalidChars(newName);
-
-                if (!newName) {
-                    codeFileNav.showFileList();
-
-                    return;
-                }
-
-                newPath = path.join(data.cwd, newName);
-
+            getNewPath('The destination already exists, enter another name', data.cwd, newPath => {
                 method(cutCopyFileMemory.path, newPath, err => {
                     cutCopyCmdMemory = undefined;
 
