@@ -63,6 +63,8 @@ For example:
   - Prompts you for a new folder name and attempt to create a new folder
 - `> Rename`
   - Allows you to select a file or folder to rename
+- `> Duplicate`
+  - Allows you to select a file or folder to duplicate in the current folder
 - `> Copy`
   - Allows you to select a file or folder to copy
 - `> Cut`
@@ -79,10 +81,7 @@ For example:
 ## To do
 
 - Write unit tests
-- Implement `> Duplicate` command (shortcut for `> Copy` then `> Paste` in the same folder
 - Implement `> Change mode` command
-- Recursive mkdir for any command that could include additional folders using slashes
-- Check for existing files or folders properly on all commands
 - Create multiple files or folders in the current directory with any command that would create files or folders
 - Configurable file/folder exclusions (read .gitignore etc)
 - Configurable file/folder exclusions (manual)
