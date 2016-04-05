@@ -82,7 +82,7 @@ For example:
 
 - Write unit tests
 - Implement `> Change mode` command
-- Create multiple files or folders in the current directory with any command that would create files or folders
+- Create multiple files or folders in the current directory when using curly braces in the name
 - Configurable file/folder exclusions (read .gitignore etc)
 - Configurable file/folder exclusions (manual)
 - Configurable default folder to open
