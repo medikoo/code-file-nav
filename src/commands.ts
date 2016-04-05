@@ -330,10 +330,18 @@ export function changeDrive(data: CmdData): void {
     drivelist.list((err, drives) => {
         if (codeFileNav.checkError(err)) { return; }
 
-        const driveList: string[] = drives.map(drive => drive.name);
+        const driveList: string[] = drives.map(drive => `${drive.name} (${drive.description})`);
 
-        vscode.window.showQuickPick(driveList).then(drive => {
-            codeFileNav.showFileList(drive);
+        vscode.window.showQuickPick(driveList).then(driveLabel => {
+            const drive = drives.find(drive => `${drive.name} (${drive.description})` === driveLabel);
+
+            if (!drive) {
+                codeFileNav.showFileList();
+
+                return;
+            }
+
+            codeFileNav.showFileList(drive.name);
         });
     });
 }
