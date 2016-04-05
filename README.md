@@ -10,7 +10,11 @@ Currently this extension has only been tested on Windows 10 so Mac and Linux use
 
 After opening VSCode use the default `ctrl+l` key binding to show a quick pick palette that lists all of the files and folders in the directory of the current active document in VSCode.
 
-If no document is currently active then it will open either the current open folder in VSCode, the root of your hard drive or the VSCode install folder.
+You can bind your own key combination by adding the following to your keyboard shortcuts file:
+
+```
+{ "key": "ctrl+l", "command": "extension.codeFileNav" }
+```
 
 Using the arrow keys and the enter key you can navigate your file system.
 
@@ -21,6 +25,21 @@ Selecting a file will attempt to open that file in VSCode.
 You can also use the commands at the bottom of the quick pick palette to perform additional actions in the current folder.
 
 ## Configuration
+
+`codeFileNav.defaultFolder`
+
+A string of pipe separated values that will be check in left to right order to determine which folder to open in the quick pick palette upon running the command.
+
+For example: `${folder}|${workspace}|${home}/some-file|${home}`
+
+- `${folder}` will open the folder of the current active file in the editor
+- `${workspace}` will open the folder that is open in VS Code
+- `${home}` will be expanded to whatever value is returned from `os.homedir()`
+
+Because the values are checked from left to right, the default configuration (`${folder}|${workspace}|${home}`) will first try to open the
+folder of the current active file, then the workspace folder, then the home directory.
+
+Assuming that all values in the configuration can't be found then a fallback value of whatever `os.homedir()` returns will be used instead.
 
 `codeFileNav.bookmarks`
 
@@ -80,17 +99,12 @@ For example:
 
 ## To do
 
-- Write unit tests
 - Implement `> Change mode` command
-- Create multiple files or folders in the current directory when using curly braces in the name
-- Configurable file/folder exclusions (read .gitignore etc)
-- Configurable file/folder exclusions (manual)
-- Configurable default folder to open
 - Configurable file permissions for new files and folders
 
 ## Contributing
 
-Contributions are welcome from anybody at the [GitHub repository][code-file-nav-github], especially contributions that may fix any potential cross-platform issues.
+Contributions are welcome from anybody at the [GitHub repository][code-file-nav-github].
 
 ## License
 
