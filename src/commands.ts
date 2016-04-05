@@ -143,11 +143,11 @@ export function handle(cmdLabel: string, data: CmdData): boolean {
 // Command handlers are defined below //
 ////////////////////////////////////////
 
-export function up(data: CmdData): void {
+function up(data: CmdData): void {
     codeFileNav.showFileList(path.join(data.cwd, '..'));
 }
 
-export function newFile(data: CmdData): void {
+function newFile(data: CmdData): void {
     getNewPath('Enter a new file name', data.cwd, newPath => {
         fs.writeFile(newPath, '', err => {
             if (codeFileNav.checkError(err)) { return; }
@@ -157,7 +157,7 @@ export function newFile(data: CmdData): void {
     });
 }
 
-export function newFolder(data: CmdData): void {
+function newFolder(data: CmdData): void {
     getNewPath('Enter a new folder name', data.cwd, newPath => {
         fs.mkdir(newPath, err => {
             if (codeFileNav.checkError(err)) { return; }
@@ -167,7 +167,7 @@ export function newFolder(data: CmdData): void {
     });
 }
 
-export function remove(data: CmdData): void {
+function remove(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to delete'
     }).then(label => {
@@ -199,7 +199,7 @@ export function remove(data: CmdData): void {
     });
 }
 
-export function rename(data: CmdData): void {
+function rename(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to rename'
     }).then(label => {
@@ -221,7 +221,7 @@ export function rename(data: CmdData): void {
     });
 }
 
-export function duplicate(data: CmdData): void {
+function duplicate(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to duplicate'
     }).then(label => {
@@ -243,7 +243,7 @@ export function duplicate(data: CmdData): void {
     });
 }
 
-export function copy(data: CmdData): void {
+function copy(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to copy'
     }).then(label => {
@@ -268,7 +268,7 @@ export function copy(data: CmdData): void {
     });
 }
 
-export function cut(data: CmdData): void {
+function cut(data: CmdData): void {
     vscode.window.showQuickPick(data.files.map(file => file.label), {
         placeHolder: 'Choose a file or folder to cut'
     }).then(label => {
@@ -293,7 +293,7 @@ export function cut(data: CmdData): void {
     });
 }
 
-export function paste(data: CmdData): void {
+function paste(data: CmdData): void {
     if (!cutCopyFileMemory) {
         codeFileNav.showFileList();
 
@@ -326,7 +326,7 @@ export function paste(data: CmdData): void {
     });
 }
 
-export function changeDrive(data: CmdData): void {
+function changeDrive(data: CmdData): void {
     drivelist.list((err, drives) => {
         if (codeFileNav.checkError(err)) { return; }
 
@@ -346,7 +346,7 @@ export function changeDrive(data: CmdData): void {
     });
 }
 
-export function bookmarks(data: CmdData): void {
+function bookmarks(data: CmdData): void {
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('codeFileNav');
     const platform = os.platform();
     const bookmarks: Bookmark[] = config.get(`bookmarks.${platform}`, []);
