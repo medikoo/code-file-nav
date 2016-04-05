@@ -4,7 +4,7 @@
   "description": "A Visual Studio Code extension that allows easy navigation and file/folder manipulation of the filesystem via quick pick palettes",
   "version": "0.6.0",
   "publisher": "jakelucas",
-  "icon": "img/icon.jpg",
+  "icon": "img/icon.png",
   "license": "MIT",
   "homepage": "https://github.com/jakelucas/code-file-nav",
   "repository": {
