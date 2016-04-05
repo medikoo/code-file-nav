@@ -51,6 +51,11 @@ const cmds: Cmd[] = [
     },
     {
         position: 'bottom',
+        label: '> Duplicate',
+        handler: duplicate,
+    },
+    {
+        position: 'bottom',
         label: '> Copy',
         handler: copy,
     },
@@ -208,6 +213,28 @@ export function rename(data: CmdData): void {
 
         getNewPath('Enter a new name', data.cwd, newPath => {
             fs.rename(file.path, newPath, err => {
+                if (codeFileNav.checkError(err)) { return; }
+
+                codeFileNav.showFileList();
+            });
+        });
+    });
+}
+
+export function duplicate(data: CmdData): void {
+    vscode.window.showQuickPick(data.files.map(file => file.label), {
+        placeHolder: 'Choose a file or folder to duplicate'
+    }).then(label => {
+        const file: codeFileNav.FileData = data.files.find(file => file.label === label);
+
+        if (!file) {
+            codeFileNav.showFileList();
+
+            return;
+        }
+
+        getNewPath('The destination already exists, enter another name', data.cwd, newPath => {
+            fs.copy(file.path, newPath, err => {
                 if (codeFileNav.checkError(err)) { return; }
 
                 codeFileNav.showFileList();
