@@ -233,7 +233,7 @@ function duplicate(data: CmdData): void {
             return;
         }
 
-        getNewPath('The destination already exists, enter another name', data.cwd, newPath => {
+        getNewPath('Enter a new name', data.cwd, newPath => {
             fs.copy(file.path, newPath, err => {
                 if (codeFileNav.checkError(err)) { return; }
 
