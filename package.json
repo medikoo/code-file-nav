@@ -42,6 +42,11 @@
         "type": "object",
         "title": "Code File Nav configuration",
         "properties": {
+            "codeFileNav.defaultFolder": {
+                "type": "string",
+                "description": "The default paths to open when the codeFileNav command is run separated by pipes",
+                "default": "${folder}|${workspace}|${home}"
+            },
             "codeFileNav.bookmarks": {
                 "type": "object",
                 "description": "An array of bookmark objects to be used in the bookmark command's list based on the return value of `os.platform()`",
