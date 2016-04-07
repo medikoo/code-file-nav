@@ -42,6 +42,11 @@
         "type": "object",
         "title": "Code File Nav configuration",
         "properties": {
+            "codeFileNav.codePath": {
+                "type": "string",
+                "description": "A path to the VS Code executable you want to use (code or code-insiders assumes it is in your PATH)",
+                "default": "code"
+            },
             "codeFileNav.defaultFolder": {
                 "type": "string",
                 "description": "The default paths to open when the codeFileNav command is run separated by pipes",
