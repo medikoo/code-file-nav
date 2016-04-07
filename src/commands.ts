@@ -353,15 +353,21 @@ function changeDrive(data: CmdData): void {
 }
 
 function openWorkspace(data: CmdData): void {
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('codeFileNav');
-    const codePath: string = config.get('codePath', 'code');
-
-    vscode.window.showQuickPick(['No', 'Yes'], {
+    vscode.window.showQuickPick(['Reuse this window', 'Open in a new window'], {
         placeHolder: 'Do you want to open a new instance of VS Code?'
     }).then(answer => {
-        const rFlag = answer === 'Yes' ? '' : '-r';
+        const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('codeFileNav');
+        const platform: string = os.platform();
+        const rFlag: string = answer === 'Open in a new window' ? '-n' : '-r';
+        const folderPath: string = data.cwd.includes(' ') ? `"${data.cwd}"` : data.cwd;
+        const platformCodePath: string = config.get(`codePath.${platform}`, 'code');
+        const codePath: string = platformCodePath.includes(' ') ? `"${platformCodePath}"` : platformCodePath;
 
-        child_process.exec(`${codePath} "${data.cwd}" ${rFlag}`);
+        child_process.exec(`${codePath} ${folderPath} ${rFlag}`, err => {
+            if (err) {
+                vscode.window.showErrorMessage(`Error: Ensure that your 'codeFileNav.codePath.${platform}' configuration is correct.`)
+            }
+        });
     });
 }
 

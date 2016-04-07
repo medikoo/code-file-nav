@@ -43,9 +43,13 @@
         "title": "Code File Nav configuration",
         "properties": {
             "codeFileNav.codePath": {
-                "type": "string",
-                "description": "A path to the VS Code executable you want to use (code or code-insiders assumes it is in your PATH)",
-                "default": "code"
+                "type": "object",
+                "description": "An object of paths to the VS Code executable you want to use based on platform",
+                "default": {
+                    "win32": "C:\\Program Files (x86)\\Microsoft VS Code\\bin\\code",
+                    "darwin": "code",
+                    "linux": "code"
+                }
             },
             "codeFileNav.defaultFolder": {
                 "type": "string",
