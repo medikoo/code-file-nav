@@ -73,6 +73,10 @@ For example:
 "codeFileNav.bookmarks": {
     "win32": [
         {
+            "label": "Home",
+            "path": "${home}"
+        },
+        {
             "label": "Desktop",
             "path": "${home}/Desktop"
         },
@@ -83,6 +87,18 @@ For example:
         {
             "label": "Downloads",
             "path": "${home}/Downloads"
+        }
+    ],
+    "darwin": [
+        {
+            "label": "Home",
+            "path": "${home}"
+        }
+    ],
+    "linux": [
+        {
+            "label": "Home",
+            "path": "${home}"
         }
     ]
 }
