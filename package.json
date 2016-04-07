@@ -2,7 +2,7 @@
   "name": "code-file-nav",
   "displayName": "File Navigator",
   "description": "A Visual Studio Code extension that allows easy navigation and file/folder manipulation of the filesystem via quick pick palettes",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "publisher": "jakelucas",
   "icon": "img/icon.png",
   "license": "MIT",
