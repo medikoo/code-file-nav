@@ -83,8 +83,8 @@ const cmds: Cmd[] = [
     },
     {
         position: 'bottom',
-        label: '> Open this folder as a workspace',
-        handler: openWorkspace,
+        label: '> Open this folder',
+        handler: openFolder,
     },
     {
         position: 'bottom',
@@ -352,7 +352,7 @@ function changeDrive(data: CmdData): void {
     });
 }
 
-function openWorkspace(data: CmdData): void {
+function openFolder(data: CmdData): void {
     vscode.window.showQuickPick(['Reuse this window', 'Open in a new window'], {
         placeHolder: 'Do you want to open a new instance of VS Code?'
     }).then(answer => {
