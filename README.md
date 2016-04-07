@@ -26,6 +26,22 @@ You can also use the commands at the bottom of the quick pick palette to perform
 
 ## Configuration
 
+`codeFileNav.codePath`
+
+Accepts an object of strings. The string to be used as the VS Code path will be found based on the return value of `os.platform()` which will be used as a key.
+
+You should edit these entries if you wish to use `code-insiders` instead of `code` or if your executable is in a different location.
+
+For example:
+
+```
+"codeFileNav.codePath": {
+    "win32": "C:\\Program Files (x86)\\Microsoft VS Code\\bin\\code",
+    "darwin": "code",
+    "linux": "code"
+}
+```
+
 `codeFileNav.defaultFolder`
 
 A string of pipe separated values that will be check in left to right order to determine which folder to open in the quick pick palette upon running the command.
@@ -94,6 +110,8 @@ For example:
   - Allows you to select a file or folder to delete
 - `> Change drive`
   - Uses the [`drivelist`][drivelist-github] node module to list available drives to switch to
+- `> Open this folder`
+  - Attempts to open the current folder in VS Code giving you the option to reuse the current instance or start a new one
 - `> Bookmarks`
   - Displays a list of bookmarked folders from the extension configuration based on the OS returned from `os.platform()`
 
