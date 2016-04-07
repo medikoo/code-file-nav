@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as os from 'os';
+import * as child_process from 'child_process';
 import * as codeFileNav from './code_file_nav';
 const fs = require('fs-extra');
 const drivelist = require('drivelist');
@@ -79,6 +80,11 @@ const cmds: Cmd[] = [
         position: 'bottom',
         label: '> Change drive',
         handler: changeDrive,
+    },
+    {
+        position: 'bottom',
+        label: '> Open this folder as a workspace',
+        handler: openWorkspace,
     },
     {
         position: 'bottom',
@@ -343,6 +349,19 @@ function changeDrive(data: CmdData): void {
 
             codeFileNav.showFileList(drive.name);
         });
+    });
+}
+
+function openWorkspace(data: CmdData): void {
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('codeFileNav');
+    const codePath: string = config.get('codePath', 'code');
+
+    vscode.window.showQuickPick(['No', 'Yes'], {
+        placeHolder: 'Do you want to open a new instance of VS Code?'
+    }).then(answer => {
+        const rFlag = answer === 'Yes' ? '' : '-r';
+
+        child_process.exec(`${codePath} "${data.cwd}" ${rFlag}`);
     });
 }
 
