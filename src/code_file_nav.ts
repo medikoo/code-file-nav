@@ -83,7 +83,7 @@ export function showFileList(dir?: string): void {
                 showFileList(file.path);
             } else if (file.isFile) {
                 vscode.workspace.openTextDocument(file.path).then(doc => {
-                    vscode.window.showTextDocument(doc);
+                    vscode.window.showTextDocument(doc, vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined);
                 });
             }
         });
